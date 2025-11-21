@@ -5,7 +5,7 @@ import { getApiUrl } from '../../config/api';
 const FaceCard = ({ person, onClick }) => {
   const { id, name, face_count, representative_face } = person;
 
-  if (!representative_face) {
+  if (!representative_face || !representative_face.photo_url) {
     return null;
   }
 
@@ -61,12 +61,12 @@ const FindPeople = ({ onPersonSelect }) => {
   const [persons, setPersons] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const API = getApiUrl();
 
   useEffect(() => {
     const fetchPersons = async () => {
       try {
         setLoading(true);
+        const API = getApiUrl();
         const res = await fetch(`${API}/persons`);
         if (!res.ok) {
           throw new Error('Failed to fetch persons');
@@ -83,7 +83,7 @@ const FindPeople = ({ onPersonSelect }) => {
     };
 
     fetchPersons();
-  }, [API]);
+  }, []);
 
   const handlePersonClick = (person) => {
     if (onPersonSelect) {

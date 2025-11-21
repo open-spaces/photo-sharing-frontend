@@ -2,15 +2,10 @@ name: ci-cd-frontend
 on:
   push:
     branches: [ main ]
-  workflow_dispatch:
-
-concurrency:
-  group: wedding-frontend-${{ github.ref }}
-  cancel-in-progress: true
 
 jobs:
   test-build-deploy:
-    runs-on: [self-hosted, wedding-runner]   # <-- your runner labels
+    runs-on: [self-hosted]   # <-- your runner labels
     defaults:
       run:
         shell: bash
@@ -35,10 +30,10 @@ jobs:
 
       # ---- Build & Deploy with Compose on the server ----
       - name: Build frontend image
-        run: docker compose -f /srv/wedding/docker-compose.yml build frontend
+        run: docker compose -f /srv/wedding/docker-compose.yml build --no-cache frontend
 
       - name: Start/Update frontend
-        run: docker compose -f /srv/wedding/docker-compose.yml up -d frontend
+        run: docker compose -f /srv/wedding/docker-compose.yml up -d --no-deps frontend
 
       - name: Cleanup dangling images
         run: docker image prune -f
