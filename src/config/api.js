@@ -1,11 +1,16 @@
 // API Configuration - Used only by App.js to configure the entire application
+// Respects environment variables set during Docker build or development
 const API_CONFIG = {
   // Base URL for the API
-  BASE_URL: 'http://localhost:8000',
-  
-  // WebSocket URL
-  WS_URL: 'localhost:8000',
-  
+  // In development: http://localhost:8000
+  // In production: uses REACT_APP_API_URL from environment (e.g., https://wedding.open-spaces.xyz/api)
+  BASE_URL: process.env.REACT_APP_API_URL || 'http://localhost:8000',
+
+  // WebSocket URL (without protocol)
+  // In development: localhost:8000
+  // In production: uses REACT_APP_WS_URL from environment (e.g., wedding.open-spaces.xyz)
+  WS_URL: process.env.REACT_APP_WS_URL || 'localhost:8000',
+
   // Available endpoints (for documentation)
   ENDPOINTS: {
     PHOTOS: '/photos',
