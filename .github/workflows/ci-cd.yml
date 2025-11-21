@@ -26,7 +26,7 @@ jobs:
       # ---- Sync working tree to deployment dir ----
       - name: Sync to /srv/wedding/frontend
         run: |
-          rsync -a --delete --exclude='.git' ./ /srv/wedding/frontend/
+          rsync -a --delete --exclude='.git' ./ /srv/wedding/photo-sharing-frontend/
           rsync -a --delete --exclude='.git' /home/ariel/wedding-app/docker-compose.yml /srv/wedding/docker-compose.yml
 
 
