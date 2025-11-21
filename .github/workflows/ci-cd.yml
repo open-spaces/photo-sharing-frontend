@@ -10,7 +10,7 @@ concurrency:
 
 jobs:
   test-build-deploy:
-    runs-on: [self-hosted, wedding-runner]   # <-- your runner labels
+    runs-on: [self-hosted]   # <-- your runner labels
     defaults:
       run:
         shell: bash
