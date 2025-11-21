@@ -2,7 +2,7 @@ import { useState, useCallback } from "react";
 import GalleryGrid from "./GalleryGrid";
 import FabDock from "./FabDock";
 import { Viewer } from "../Viewer/Viewer";
-import "./gallery.css";
+import "./Gallery.css";
 
 export default function GalleryContainer({
   images,
