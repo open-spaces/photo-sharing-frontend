@@ -13,12 +13,12 @@ const API_CONFIG = {
 
   // Available endpoints (for documentation)
   ENDPOINTS: {
-    PHOTOS: '/photos',
-    MY_PHOTOS: '/my-photos',
-    GOOGLE_LOGIN: '/google-login',
-    VERIFY_TOKEN: '/verify-token',
-    UPLOAD: '/upload',
-    GUEST_COUNT: '/guest',
+    PHOTOS: '/api/photos',
+    MY_PHOTOS: '/api/my-photos',
+    GOOGLE_LOGIN: '/api/google-login',
+    VERIFY_TOKEN: '/api/verify-token',
+    UPLOAD: '/api/upload',
+    GUEST_COUNT: '/api/guest',
     WEBSOCKET: '/ws'
   }
 };
