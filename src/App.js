@@ -6,7 +6,7 @@ import LoginContainer from "./components/Login/LoginContainer";
 import FindPeople from "./components/FindPeople/FindPeople";
 import { getApiUrl, getWebSocketUrl, deletePhotoUrl } from "./config/api";
 import "./components/Profile/Profile.css";
-import "./components/Gallery/gallery.css";
+import "./components/Gallery/Gallery.css";
 import "./components/Login/Login.css";
 import "./App.css";
 
