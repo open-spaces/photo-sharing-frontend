@@ -6,17 +6,17 @@
     --radius: 14px;
 
     /* colors */
-    --ink: #f5f6f7;
-    --muted: #c8c8c8;
-    --accent: #2ea6ff;
+    --ink: #2a2a2a;
+    --muted: #7a6e67;
+    --accent: #3da65b;
     /* primary action */
-    --accent-2: #ffd166;
+    --accent-2: #d9f5e1;
     /* tabs underline */
 
     /* surfaces */
-    --glass: rgba(20, 20, 20, .55);
-    --glass-strong: rgba(20, 20, 20, .75);
-    --ring: 1px solid rgba(255, 255, 255, .10);
+    --glass: rgba(255, 255, 255, .78);
+    --glass-strong: rgba(255, 255, 255, .86);
+    --ring: 1px solid rgba(0, 0, 0, .08);
 }
 
 /* Reset-ish */
@@ -38,10 +38,12 @@ body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 
-    /* subtle warm gradient backdrop that works with your theme */
+    /* gentle cream backdrop */
     background:
-        radial-gradient(1200px 900px at 10% -10%, rgba(255, 255, 255, .05), transparent 40%),
-        linear-gradient(160deg, #8a673a, #5c4a2e 65%, #4b3b2c);
+        radial-gradient(1200px 900px at 12% -10%, rgba(255, 232, 214, .28), transparent 45%),
+        radial-gradient(900px 700px at 70% 20%, rgba(61, 166, 91, .20), transparent 55%),
+        radial-gradient(1000px 800px at 90% 110%, rgba(255, 240, 220, .35), transparent 55%),
+        linear-gradient(180deg, #fffdf9, #fff8f1 55%, #fff3e8);
 }
 
 img,

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './Login.css';
+import { triggerGoogleLogin } from '../../utils/googleAuth';
 
 export function Login({ onLogin, onGuestLogin, API }) {
   const [error, setError] = useState('');
@@ -10,7 +11,7 @@ export function Login({ onLogin, onGuestLogin, API }) {
       window.google.accounts.id.initialize({
         client_id:
           process.env.REACT_APP_GOOGLE_CLIENT_ID ||
-          'your-google-client-id.apps.googleusercontent.com',
+          '163092054167-svtia0dcjfaq3152kcr6leueiff6d6mk.apps.googleusercontent.com',
         callback: handleGoogleResponse,
       });
 
@@ -54,6 +55,24 @@ export function Login({ onLogin, onGuestLogin, API }) {
     } finally {
       setGoogleLoading(false);
     }
+  };
+
+  // Programmatic trigger (can be called from outside or via button)
+  const handleProgrammaticLogin = () => {
+    setGoogleLoading(true);
+    setError('');
+
+    triggerGoogleLogin(
+      (data) => {
+        onLogin(data);
+        setGoogleLoading(false);
+      },
+      (errorMsg) => {
+        setError(errorMsg);
+        setGoogleLoading(false);
+      },
+      API
+    );
   };
 
   return (

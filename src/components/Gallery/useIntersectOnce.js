@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
 /** Track elements that have intersected at least once; returns a Set of indices. */
-export default function useIntersectOnce(rootRef, selector) {
+export default function useIntersectOnce(rootRef, selector, deps = []) {
   const [seen, setSeen] = useState(() => new Set());
   useEffect(() => {
     const root = rootRef.current;
@@ -19,6 +19,6 @@ export default function useIntersectOnce(rootRef, selector) {
     );
     els.forEach(el => obs.observe(el));
     return () => obs.disconnect();
-  }, [rootRef, selector]);
+  }, [rootRef, selector, ...deps]);
   return seen;
 }

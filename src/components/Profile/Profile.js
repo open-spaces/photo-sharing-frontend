@@ -1,8 +1,8 @@
 import React, { useRef, useEffect, useState } from "react";
 import "./Profile.css";
-import ColorThief from "color-thief-browser";
 
 import ProfileImage from "../../assets/images/proposal-image.png";
+import { triggerGoogleLogin as triggerGoogleLoginUtil } from "../../utils/googleAuth";
 
 /**
  * A warm, accessible profile header that nudges users to share,
@@ -18,17 +18,37 @@ export function Profile({
   setUploadError,
   user,
   onLogout,
-  isGuest
-}) {
+  isGuest,
+  onLogin,
+  activeTab,
+  onTabChange,
+  selectedPerson,
+  onBackToFaces
+  }) {
   const fileInput = useRef(null);
   const imgRef = useRef(null);
 
   const [showFullBio, setShowFullBio] = useState(false);
   const [localToast, setLocalToast] = useState("");
 
+  const triggerGoogleLogin = () => {
+    triggerGoogleLoginUtil(
+      (data) => {
+        // Success callback - call parent's onLogin handler
+        onLogin(data);
+        setLocalToast("Welcome! You're now signed in.");
+      },
+      (error) => {
+        // Error callback - show error message
+        setUploadError(error || "Google login failed. Please try again.");
+      },
+      API
+    );
+  };
+
   const handleUploadClick = () => {
     if (isGuest) {
-      setLocalToast("Please sign in to share photos. Guests can browse and enjoy 🌟");
+      triggerGoogleLogin();
       return;
     }
     fileInput.current?.click();
@@ -70,40 +90,43 @@ export function Profile({
         throw new Error(errorData.detail || `Upload failed: ${response.status}`);
       }
 
+      const okData = await response.json().catch(() => null);
+      const added = okData && typeof okData.count === 'number' ? okData.count : files.length;
+      const duplicates = okData && typeof okData.duplicates === 'number' ? okData.duplicates : 0;
+
       // Optimistic increment then refresh
-      setImageCount((n) => n + files.length);
-      fetchImages();
+      setImageCount((n) => n + added);
+      // Refresh current tab data (App passes fetchAllPhotos/fetchMyPhotos)
+      await Promise.resolve(fetchImages && fetchImages());
 
       // Reset input (keep the user in context)
       e.target.value = "";
 
-      // Offer a friendly toast
-      setLocalToast(`Thanks for sharing 💖 Added ${files.length} photo${files.length > 1 ? "s" : ""}.`);
+      // Offer a friendly toast with detailed feedback
+      let message = "";
+      if (added > 0 && duplicates === 0) {
+        // All photos uploaded successfully
+        message = `Thanks for sharing 💖 Added ${added} photo${added > 1 ? "s" : ""}.`;
+      } else if (added > 0 && duplicates > 0) {
+        // Some uploaded, some duplicates
+        message = `Added ${added} photo${added > 1 ? "s" : ""}. ${duplicates} duplicate${duplicates > 1 ? "s" : ""} skipped.`;
+      } else if (added === 0 && duplicates > 0) {
+        // All were duplicates
+        message = `All ${duplicates} photo${duplicates > 1 ? "s are" : " is"} already uploaded.`;
+      }
+
+      setLocalToast(message);
     } catch (error) {
       console.error("Upload error:", error);
       setUploadError(error.message || "We couldn’t upload right now. Please try again in a moment.");
     }
   };
 
-  /** Extract colours after the image has loaded and set the page gradient */
+  // Use a consistent app background set via global CSS (see App.css).
+  // We intentionally avoid overriding document.body background here so the
+  // whole app keeps the same white–blue variant.
   useEffect(() => {
-    const img = imgRef.current;
-    if (!img) return;
-
-    const applyGradient = () => {
-      try {
-        const thief = new ColorThief();
-        const [c1, c2] = thief.getPalette(img, 2);
-        const toRGB = (c) => `rgb(${c[0]},${c[1]},${c[2]})`;
-        document.body.style.background = `linear-gradient(135deg, ${toRGB(c1)}, ${toRGB(c2)})`;
-      } catch {
-        /* if color extraction fails, keep existing background */
-      }
-    };
-
-    if (img.complete) applyGradient();
-    else img.addEventListener("load", applyGradient);
-    return () => img.removeEventListener("load", applyGradient);
+    // no-op: background handled globally
   }, []);
 
   return (
@@ -259,13 +282,28 @@ export function Profile({
 
         {/* Tabs */}
         <nav className="profile-tabs" aria-label="Gallery tabs">
-          <button className="profile-tab active" aria-current="page">
+          <button className={`profile-tab ${activeTab === 'all' ? 'active' : ''}`} aria-current={activeTab === 'all' ? 'page' : undefined} onClick={() => onTabChange && onTabChange('all')}>
             <span aria-hidden>📷</span> ALL PHOTOS
           </button>
-          <button className="profile-tab">
-            <span aria-hidden>👥</span> GUEST PHOTOS
+          <button className={`profile-tab ${activeTab === 'mine' ? 'active' : ''}`} aria-current={activeTab === 'mine' ? 'page' : undefined} onClick={() => onTabChange && onTabChange('mine')} disabled={!user} title={!user ? 'Sign in to view your photos' : 'My Photos'}>
+            <span aria-hidden>👥</span> MY PHOTOS
+          </button>
+          <button className={`profile-tab ${activeTab === 'find' ? 'active' : ''}`} onClick={() => onTabChange && onTabChange('find')} aria-current={activeTab === 'find' ? 'page' : undefined}>
+            <span aria-hidden>🔎</span> FIND ME
           </button>
         </nav>
+
+        {/* Back to Faces button when viewing a person's photos */}
+        {activeTab === 'find' && selectedPerson && onBackToFaces && (
+          <div className="back-to-faces-container">
+            <button className="back-to-faces-button" onClick={onBackToFaces}>
+              <span aria-hidden>←</span> Back to All Faces
+            </button>
+            <div className="selected-person-info">
+              Viewing photos of {selectedPerson.name || `Person ${selectedPerson.id}`}
+            </div>
+          </div>
+        )}
       </div>
     </header>
   );

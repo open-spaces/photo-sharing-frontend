@@ -3,19 +3,19 @@
 :root {
     --gap: clamp(10px, 2.6vw, 18px);
 
-    --card-bg: #111;
-    --ring: 1px solid rgba(255, 255, 255, .10);
+    --card-bg: #fafafa;
+    --ring: 1px solid rgba(0, 0, 0, .08);
 
-    --accent: #0a84ff;
+    --accent: #3da65b;
     /* iOS blue */
-    --accent-2: #ffd166;
+    --accent-2: #d9f5e1;
 
     /* Stronger, viewer-like glass so text stays readable on white images */
-    --glass-btn: rgba(10, 10, 10, .66);
-    --glass-btn-hover: rgba(10, 10, 10, .76);
-    --glass-border: rgba(255, 255, 255, .50);
-    --glass-action: rgba(10, 10, 10, .58);
-    --glass-chip: rgba(255, 255, 255, .16);
+    --glass-btn: rgba(255, 255, 255, .92);
+    --glass-btn-hover: rgba(255, 255, 255, .98);
+    --glass-border: rgba(0, 0, 0, .12);
+    --glass-action: rgba(255, 255, 255, .90);
+    --glass-chip: rgba(255, 255, 255, .80);
 }
 
 /* Grid (unchanged) */
@@ -62,7 +62,7 @@
 }
 
 .gallery-item:focus-visible {
-    box-shadow: 0 0 0 3px rgba(255, 255, 255, .6), 0 8px 22px rgba(0, 0, 0, .35);
+    box-shadow: 0 0 0 3px rgba(61, 166, 91, .35), 0 8px 22px rgba(0, 0, 0, .18);
 }
 
 .gallery-item.is-picked {

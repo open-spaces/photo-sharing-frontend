@@ -8,10 +8,11 @@ const API_CONFIG = {
   
   // Available endpoints (for documentation)
   ENDPOINTS: {
+    PHOTOS: '/photos',
+    MY_PHOTOS: '/my-photos',
     GOOGLE_LOGIN: '/google-login',
     VERIFY_TOKEN: '/verify-token',
     UPLOAD: '/upload',
-    GET_IMAGES: '/get-images',
     GUEST_COUNT: '/guest',
     WEBSOCKET: '/ws'
   }
@@ -29,3 +30,6 @@ export const getWebSocketUrl = (endpoint = '') => {
 };
 
 export default API_CONFIG;
+
+// Helper for building DELETE photo endpoint
+export const deletePhotoUrl = (id) => `${API_CONFIG.BASE_URL}/photos/${id}`;

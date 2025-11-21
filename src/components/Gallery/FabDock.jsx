@@ -12,6 +12,7 @@ export default function FabDock({
   onOpenSelect,
   onRequestCancel,         // called AFTER close animation
   onShare,                 // (setBusy, setBusyText) => Promise
+  onDelete,                // optional: (setBusy, setBusyText) => Promise
 }) {
   const [expanded, setExpanded] = useState(open); // drives the animation class
   const [busy, setBusy] = useState(false);
@@ -69,9 +70,22 @@ export default function FabDock({
             📤 {busy ? "Working…" : "Share"}
           </button>
 
+          {onDelete && (
+            <button
+              className="fab-action fab-delete"
+              style={{ "--i": 2 }}
+              onClick={() => onDelete(setBusy, setBusyText)}
+              disabled={selectedCount === 0 || busy}
+              aria-label="Delete selected"
+              title={busy ? "Working?" : "Delete"}
+            >
+              Delete
+            </button>
+          )}
+
           <div
             className="fab-chip fab-count"
-            style={{ "--i": 2 }}
+            style={{ "--i": 3 }}
             aria-live="polite"
             title={`${selectedCount} selected`}
           >

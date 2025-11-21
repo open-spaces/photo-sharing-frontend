@@ -3,7 +3,8 @@ import React, { useState, useCallback, useEffect } from "react";
 import { Profile } from "./components/Profile/Profile";
 import GalleryContainer from "./components/Gallery/GalleryContainer";
 import LoginContainer from "./components/Login/LoginContainer";
-import { getApiUrl, getWebSocketUrl } from "./config/api";
+import FindPeople from "./components/FindPeople/FindPeople";
+import { getApiUrl, getWebSocketUrl, deletePhotoUrl } from "./config/api";
 import "./components/Profile/Profile.css";
 import "./components/Gallery/gallery.css";
 import "./components/Login/Login.css";
@@ -16,7 +17,12 @@ export default function App() {
   const [viewerOpen,  setViewerOpen]  = useState(false);
   const [lastViewedIndex, setLastIdx] = useState(0);
   const [uploadError, setUploadError] = useState(null);
-  
+  const [allPhotos, setAllPhotos]     = useState([]);
+  const [myPhotos, setMyPhotos]       = useState([]);
+  const [activeTab, setActiveTab]     = useState("all");
+  const [selectedPerson, setSelectedPerson] = useState(null);
+  const [personPhotos, setPersonPhotos] = useState([]);
+
   // Authentication state
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState(null);
@@ -55,30 +61,106 @@ export default function App() {
     }
   }, []);
 
-  /** one function in charge of talking to the server */
-  const fetchImages = useCallback(async (signal) => {
+  // Fetch ALL photos (DB-backed)
+  const fetchAllPhotos = useCallback(async (signal) => {
     try {
-      console.log("API:", API);
-      const res  = await fetch(`${API}/get-images`, { signal });
-      const list = await res.json();                      // [ ".../uploads/abc.jpg", … ]
-      console.log("list:", list);
-      setImages(list);
-      setImageCount(list.length);
+      const res  = await fetch(`${API}/photos`, { signal, cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } });
+      if (res.status === 304) return; // keep current state
+      const data = await res.json();
+      const urls = Array.isArray(data) ? data.map(p => p.url) : [];
+      setAllPhotos(Array.isArray(data) ? data : []);
+      if (activeTab === 'all') {
+        setImages(urls);
+        setImageCount(urls.length);
+      }
     } catch (err) {
       if (err.name !== "AbortError") {
-        console.error("fetchImages failed:", err);
+        console.error("fetchAllPhotos failed:", err);
+        setAllPhotos([]);
+        if (activeTab === 'all') { setImages([]); setImageCount(0); }
+      }
+    }
+  }, [API, activeTab]);
+
+  // Fetch MY photos (requires auth)
+  const fetchMyPhotos = useCallback(async (signal) => {
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) { setMyPhotos([]); if (activeTab === 'mine') { setImages([]); setImageCount(0);} return; }
+      const res = await fetch(`${API}/my-photos`, { signal, cache: 'no-store', headers: { 'Cache-Control': 'no-cache', Authorization: `Bearer ${token}` } });
+      if (res.status === 304) return;
+      const data = await res.json();
+      const urls = Array.isArray(data) ? data.map(p => p.url) : [];
+      setMyPhotos(Array.isArray(data) ? data : []);
+      if (activeTab === 'mine') {
+        setImages(urls);
+        setImageCount(urls.length);
+      }
+    } catch (err) {
+      if (err.name !== "AbortError") {
+        console.error("fetchMyPhotos failed:", err);
+        setMyPhotos([]);
+        if (activeTab === 'mine') { setImages([]); setImageCount(0); }
+      }
+    }
+  }, [API, activeTab]);
+
+  // Fetch photos for a specific person
+  const fetchPersonPhotos = useCallback(async (personId, signal) => {
+    try {
+      const res = await fetch(`${API}/persons/${personId}/photos`, { signal, cache: 'no-store' });
+      if (!res.ok) throw new Error('Failed to fetch person photos');
+      const data = await res.json();
+      const urls = Array.isArray(data) ? data.map(p => p.url) : [];
+      setPersonPhotos(Array.isArray(data) ? data : []);
+      setImages(urls);
+      setImageCount(urls.length);
+    } catch (err) {
+      if (err.name !== "AbortError") {
+        console.error("fetchPersonPhotos failed:", err);
+        setPersonPhotos([]);
         setImages([]);
         setImageCount(0);
       }
     }
   }, [API]);
 
-  /* grab the initial gallery once, when the app mounts */
+  // Handle person selection
+  const handlePersonSelect = useCallback((person) => {
+    setSelectedPerson(person);
+    fetchPersonPhotos(person.id);
+  }, [fetchPersonPhotos]);
+
+  
+      ;
+
+  /* grab ALL photos once, when the app mounts */
   useEffect(() => {
     const controller = new AbortController();
-    fetchImages(controller.signal);
+    fetchAllPhotos(controller.signal);
     return () => controller.abort();
-  }, [fetchImages]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Update visible images when tab changes
+  useEffect(() => {
+    const controller = new AbortController();
+    if (activeTab === 'all') {
+      setSelectedPerson(null);
+      fetchAllPhotos(controller.signal);
+    } else if (activeTab === 'mine') {
+      setSelectedPerson(null);
+      fetchMyPhotos(controller.signal);
+    } else if (activeTab === 'find') {
+      // Reset images when entering find tab (will show FindPeople component)
+      if (!selectedPerson) {
+        setImages([]);
+        setImageCount(0);
+      }
+    }
+    return () => controller.abort();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab]);
 
   useEffect(() => {
     // live guest counter
@@ -104,6 +186,29 @@ export default function App() {
     setViewerOpen(false);
   }, []);
 
+  // Delete selected photos for My Photos tab
+  const deleteMyPhotosByIndices = useCallback(async (indices, setBusy, setBusyText) => {
+    const token = localStorage.getItem('authToken');
+    if (!token) return;
+    const ids = indices
+      .sort((a,b)=>a-b)
+      .map(i => (myPhotos[i] ? myPhotos[i].id : null))
+      .filter(v => v != null);
+    try {
+      setBusy(true);
+      for (let n = 0; n < ids.length; n++) {
+        const id = ids[n];
+        setBusyText(`Deleting ${n+1}/${ids.length}`);
+        await fetch(deletePhotoUrl(id), { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
+      }
+      await fetchAllPhotos();
+      await fetchMyPhotos();
+    } finally {
+      setBusy(false);
+      setBusyText("");
+    }
+  }, [myPhotos, fetchAllPhotos, fetchMyPhotos]);
+
   // Show authentication forms if not authenticated and not guest
   if (!isAuthenticated && !isGuest) {
     return (
@@ -123,24 +228,46 @@ export default function App() {
           imageCount={imageCount}
           guestCount={guestCount}
           setImageCount={setImageCount}
-          fetchImages={fetchImages}  
+          fetchImages={() => {
+            if (activeTab === 'all') return fetchAllPhotos();
+            if (activeTab === 'mine') return fetchMyPhotos();
+            if (activeTab === 'find' && selectedPerson) return fetchPersonPhotos(selectedPerson.id);
+            return Promise.resolve();
+          }}
           API={API}      // ◀—— call me after upload
           uploadError={uploadError}
           setUploadError={setUploadError}
           user={user}
           onLogout={handleLogout}
           isGuest={isGuest}
+          onLogin={handleLogin}
+          activeTab={activeTab}
+          onTabChange={(tab) => {
+            if (tab !== 'find') setSelectedPerson(null);
+            setActiveTab(tab);
+          }}
+          selectedPerson={selectedPerson}
+          onBackToFaces={() => setSelectedPerson(null)}
         />
       )}
 
-      {/* 2️⃣ gallery gets control to open / close viewer */}
-      <GalleryContainer
-        images={images}
-        viewerOpen={viewerOpen}
-        setViewerOpen={setViewerOpen}
-        lastViewedIndex={lastViewedIndex}
-        onClose={closeViewer}
-      />
+      {/* 2️⃣ Show FindPeople component when in find tab and no person selected */}
+      {activeTab === 'find' && !selectedPerson && !viewerOpen ? (
+        <FindPeople onPersonSelect={handlePersonSelect} />
+      ) : null}
+
+      {/* 3️⃣ gallery gets control to open / close viewer */}
+      {(activeTab !== 'find' || selectedPerson) ? (
+        <GalleryContainer
+          images={images}
+          viewerOpen={viewerOpen}
+          setViewerOpen={setViewerOpen}
+          lastViewedIndex={lastViewedIndex}
+          onClose={closeViewer}
+          canDelete={activeTab === 'mine'}
+          onDeleteSelected={activeTab === 'mine' ? deleteMyPhotosByIndices : undefined}
+        />
+      ) : null}
     </>
   );
 }

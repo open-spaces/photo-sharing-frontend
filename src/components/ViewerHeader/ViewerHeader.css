@@ -2,11 +2,11 @@
 
 :root{
   --gap: clamp(10px, 2.6vw, 18px);
-  --ring: 1px solid rgba(255,255,255,.10);
-  --glass-strong: rgba(20,20,20,.70);
-  --accent: #2ea6ff;
-  --accent-2: #ffd166;
-  --muted: #c8c8c8;
+  --ring: 1px solid rgba(0,0,0,.10);
+  --glass-strong: rgba(255,255,255,.86);
+  --accent: #3da65b;
+  --accent-2: #d9f5e1; /* light blue for progress blend */
+  --muted: #667085;
 }
 
 /* Sticky, compact, frosted */
@@ -26,7 +26,7 @@
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   border-bottom: var(--ring);
-  color: #fff;
+  color: #2a2a2a;
 
   transform: translateZ(0);
 }
@@ -36,7 +36,7 @@
   position: absolute;
   left: 0; right: 0; top: 0;
   height: 2px;
-  background: rgba(255,255,255,.12);
+  background: rgba(0,0,0,.06);
 }
 .vh__bar{
   height: 100%;
@@ -55,16 +55,16 @@
   height: 32px;
   padding: 0 10px;
   border-radius: 999px;
-  border: 1px solid rgba(255,255,255,.30);
-  background: rgba(0,0,0,.34);
+  border: 1px solid rgba(0,0,0,.12);
+  background: rgba(255,255,255,.92);
   -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
-  color: #fff;
+  color: #2a2a2a;
 
   cursor: pointer;
   transition: filter .2s ease, transform .08s ease, background .2s ease;
 }
-.vh__back:hover{ filter: brightness(1.06); background: rgba(0,0,0,.44); }
+.vh__back:hover{ filter: brightness(1.02); background: rgba(255,255,255,.98); }
 .vh__back:active{ transform: translateY(1px); }
 
 .vh__back-icn{ font-size: 14px; line-height: 1; }

@@ -30,7 +30,7 @@ export default function LoginProviders({ onGoogleToken, onGuest }) {
 
         const clientId =
           process.env.REACT_APP_GOOGLE_CLIENT_ID ||
-          "your-google-client-id.apps.googleusercontent.com";
+          "163092054167-svtia0dcjfaq3152kcr6leueiff6d6mk.apps.googleusercontent.com";
 
         window.google.accounts.id.initialize({
           client_id: clientId,

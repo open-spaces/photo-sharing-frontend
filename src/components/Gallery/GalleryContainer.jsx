@@ -10,6 +10,8 @@ export default function GalleryContainer({
   setViewerOpen,
   lastViewedIndex,
   onClose,
+  canDelete,
+  onDeleteSelected,
 }) {
   const [startIndex, setStartIndex] = useState(0);
 
@@ -96,6 +98,15 @@ export default function GalleryContainer({
     }
   };
 
+  const deleteSelected = async (setBusy, setBusyText) => {
+    if (!canDelete || !onDeleteSelected) return;
+    const idxs = [...selected].sort((a, b) => a - b);
+    if (!idxs.length) return;
+    await onDeleteSelected(idxs, setBusy, setBusyText);
+    // After deletion, exit selection and clear
+    exitSelect();
+  };
+
   if (viewerOpen) {
     return (
       <main className="container">
@@ -131,6 +142,7 @@ export default function GalleryContainer({
         onOpenSelect={() => setSelectMode(true)}
         onRequestCancel={exitSelect}              // will be called after the close animation
         onShare={shareSelected}
+        onDelete={canDelete ? deleteSelected : undefined}
       />
     </main>
   );

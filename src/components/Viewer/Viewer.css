@@ -4,16 +4,16 @@
     --gap: clamp(10px, 2.6vw, 18px);
     --radius: 14px;
 
-    --ink: #f5f6f7;
-    --muted: #c8c8c8;
+    --ink: #1b2a3a;
+    --muted: #667085;
 
-    --card-bg: #000;
-    --ring: 1px solid rgba(255, 255, 255, .10);
+    --card-bg: #ffffff;
+    --ring: 1px solid rgba(0, 0, 0, .08);
 
-    /* glass buttons */
-    --glass-btn: rgba(255, 255, 255, .16);
-    --glass-btn-hover: rgba(255, 255, 255, .22);
-    --glass-border: rgba(255, 255, 255, .35);
+    /* glass buttons for light theme */
+    --glass-btn: rgba(255, 255, 255, .92);
+    --glass-btn-hover: rgba(255, 255, 255, .98);
+    --glass-border: rgba(0, 0, 0, .12);
 }
 
 .viewer {
@@ -55,7 +55,7 @@
 }
 
 .viewer-item:focus-visible {
-    box-shadow: 0 0 0 3px rgba(255, 255, 255, .6), 0 10px 30px rgba(0, 0, 0, .38);
+    box-shadow: 0 0 0 3px rgba(61, 166, 91, .35), 0 10px 30px rgba(0, 0, 0, .18);
 }
 
 /* Image + loading */
@@ -64,7 +64,7 @@
     height: auto;
     display: block;
     object-fit: contain;
-    background: #111;
+    background: #fafafa;
     opacity: 0;
     transform: scale(1.01);
     transition: opacity .35s ease, transform .35s ease;
@@ -78,7 +78,7 @@
 .skeleton {
     width: 100%;
     aspect-ratio: 3 / 4;
-    background: linear-gradient(90deg, #181818 0%, #202020 25%, #181818 50%);
+    background: linear-gradient(90deg, #faf4ec 0%, #f3eadf 25%, #faf4ec 50%);
     background-size: 200% 100%;
     animation: shimmer 1.1s linear infinite;
 }
@@ -93,7 +93,7 @@
 .viewer-item.is-broken {
     display: grid;
     place-items: center;
-    background: #121212;
+    background: #f6f6f6;
     border: var(--ring);
 }
 
@@ -116,9 +116,9 @@
     margin-top: 8px;
     padding: 8px 12px;
     border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, .2);
-    background: rgba(255, 255, 255, .06);
-    color: #fff;
+    border: 1px solid rgba(0, 0, 0, .15);
+    background: rgba(255, 255, 255, .85);
+    color: #1b2a3a;
     cursor: pointer;
 }
 
@@ -162,7 +162,7 @@
     background: var(--glass-btn);
     -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
-    color: #fff;
+    color: #1b2a3a;
     font-weight: 800;
     text-transform: uppercase;
     font-size: 12px;
@@ -197,9 +197,9 @@
     width: 42px;
     height: 42px;
     border-radius: 50%;
-    border: 1px solid rgba(255, 255, 255, .35);
-    background: rgba(0, 0, 0, .45);
-    color: #fff;
+    border: 1px solid rgba(0, 0, 0, .12);
+    background: rgba(255, 255, 255, .92);
+    color: #1b2a3a;
     font-weight: 900;
     display: grid;
     place-items: center;

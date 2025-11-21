@@ -4,7 +4,7 @@ import GalleryTile from "./GalleryTile";
 
 export default function GalleryGrid({ images, selectMode, selected, order, onOpen, onTogglePick, onEnterSelect }) {
   const gridRef = useRef(null);
-  const visibleSet = useIntersectOnce(gridRef, ".gallery-item");
+  const visibleSet = useIntersectOnce(gridRef, ".gallery-item", [images.length]);
 
   return (
     <div className={`gallery ${selectMode ? "is-selecting" : ""}`} ref={gridRef} role="list" aria-label="Photo gallery">

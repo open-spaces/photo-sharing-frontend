@@ -2,10 +2,10 @@
 
 :root {
   --gap: clamp(12px, 2.8vw, 22px);
-  --ring: 1px solid rgba(255, 255, 255, .18);
-  --glass: rgba(15, 15, 15, .70);
-  --glass-2: rgba(15, 15, 15, .80);
-  --muted: #c8c8c8;
+  --ring: 1px solid rgba(0,0,0,.10);
+  --glass: rgba(255, 248, 241, .85);
+  --glass-2: rgba(255, 255, 255, .92);
+  --muted: #7a6e67;
 }
 
 .login-wrap {
@@ -16,8 +16,8 @@
   background:
     radial-gradient(120% 120% at 80% 10%, rgba(255, 255, 255, .06), transparent 40%),
     radial-gradient(120% 120% at 10% 90%, rgba(255, 255, 255, .05), transparent 40%),
-    #0f0f10;
-  color: #fff;
+    linear-gradient(180deg, #fffdf9, #fff8f1 55%, #fff3e8);
+  color: #2a2a2a;
 }
 
 .login-card {
@@ -43,10 +43,10 @@
   display: grid;
   place-items: center;
   margin: 0 auto 8px;
-  background: radial-gradient(circle at 30% 30%, #fff 0 40%, #ffe7cf 60%, #ffd9c0 100%);
-  color: #3a2516;
-  border: 1px solid rgba(97, 53, 29, .22);
-  box-shadow: 0 8px 20px rgba(97, 53, 29, .15);
+  background: radial-gradient(120% 120% at 80% 10%, rgba(61, 166, 91, .12), transparent 40%), radial-gradient(120% 120% at 10% 90%, rgba(255, 232, 214, .26), transparent 45%), linear-gradient(180deg, #fffdf9, #fff8f1 55%, #fff3e8);
+  color: #1f3a2f;
+  border: 1px solid rgba(31, 58, 47, .18);
+  box-shadow: 0 8px 20px rgba(31, 58, 47, .10);
   font-size: 22px;
 }
 
@@ -72,7 +72,7 @@
 .link {
   background: transparent;
   border: none;
-  color: #fff;
+  color: #2a2a2a;
   cursor: pointer;
   font-weight: 800;
   text-decoration: underline;
@@ -100,11 +100,11 @@
   padding: 0 14px;
   width: 100%;
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, .38);
-  background: var(--glass-2);
+  border: 1px solid rgba(0,0,0,.12);
+  background: rgba(255,255,255,.98);
   -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
-  color: #fff;
+  color: #2a2a2a;
   font-weight: 800;
   letter-spacing: .01em;
   white-space: nowrap;
@@ -119,9 +119,7 @@
   transform: translateY(1px);
 }
 
-.btn-guest {
-  background: rgba(255, 255, 255, .10);
-}
+.btn-guest { background: rgba(61, 166, 91, .14); color: #2a2a2a; }
 
 /* Error */
 .login-error {
@@ -154,7 +152,7 @@
   backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, .18);
   box-shadow: 0 30px 80px rgba(0, 0, 0, .55);
-  color: #fff;
+  color: #2a2a2a;
   display: grid;
   grid-template-rows: auto 1fr;
 }
@@ -175,9 +173,9 @@
 }
 
 .legal-close {
-  border: 1px solid rgba(255, 255, 255, .38);
+  border: 1px solid rgba(0,0,0,.12);
   background: rgba(0, 0, 0, .35);
-  color: #fff;
+  color: #2a2a2a;
   border-radius: 10px;
   height: 36px;
   padding: 0 10px;
