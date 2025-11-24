@@ -5,21 +5,22 @@ import GalleryContainer from "./components/Gallery/GalleryContainer";
 import LoginContainer from "./components/Login/LoginContainer";
 import FindPeople from "./components/FindPeople/FindPeople";
 import { getApiUrl, getWebSocketUrl, deletePhotoUrl } from "./config/api";
+import { fetchWithAuth } from "./auth";
 import "./components/Profile/Profile.css";
 import "./components/Gallery/Gallery.css";
 import "./components/Login/Login.css";
 import "./App.css";
 
 export default function App() {
-  const [imageCount, setImageCount]   = useState(0);
-  const [guestCount, setGuestCount]   = useState(0);
-  const [images, setImages]           = useState([]);
-  const [viewerOpen,  setViewerOpen]  = useState(false);
+  const [imageCount, setImageCount] = useState(0);
+  const [guestCount, setGuestCount] = useState(0);
+  const [images, setImages] = useState([]);
+  const [viewerOpen, setViewerOpen] = useState(false);
   const [lastViewedIndex, setLastIdx] = useState(0);
   const [uploadError, setUploadError] = useState(null);
-  const [allPhotos, setAllPhotos]     = useState([]);
-  const [myPhotos, setMyPhotos]       = useState([]);
-  const [activeTab, setActiveTab]     = useState("all");
+  const [allPhotos, setAllPhotos] = useState([]);
+  const [myPhotos, setMyPhotos] = useState([]);
+  const [activeTab, setActiveTab] = useState("all");
   const [selectedPerson, setSelectedPerson] = useState(null);
   const [personPhotos, setPersonPhotos] = useState([]);
 
@@ -64,7 +65,7 @@ export default function App() {
   // Fetch ALL photos (DB-backed)
   const fetchAllPhotos = useCallback(async (signal) => {
     try {
-      const res  = await fetch(`${API}/photos`, { signal, cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } });
+      const res = await fetchWithAuth(`${API}/photos`, { signal, cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } });
       if (res.status === 304) return; // keep current state
       const data = await res.json();
       const urls = Array.isArray(data) ? data.map(p => p.url) : [];
@@ -86,8 +87,8 @@ export default function App() {
   const fetchMyPhotos = useCallback(async (signal) => {
     try {
       const token = localStorage.getItem('authToken');
-      if (!token) { setMyPhotos([]); if (activeTab === 'mine') { setImages([]); setImageCount(0);} return; }
-      const res = await fetch(`${API}/my-photos`, { signal, cache: 'no-store', headers: { 'Cache-Control': 'no-cache', Authorization: `Bearer ${token}` } });
+      if (!token) { setMyPhotos([]); if (activeTab === 'mine') { setImages([]); setImageCount(0); } return; }
+      const res = await fetchWithAuth(`${API}/my-photos`, { signal, cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } });
       if (res.status === 304) return;
       const data = await res.json();
       const urls = Array.isArray(data) ? data.map(p => p.url) : [];
@@ -131,9 +132,6 @@ export default function App() {
     fetchPersonPhotos(person.id);
   }, [fetchPersonPhotos]);
 
-  
-      ;
-
   /* grab ALL photos once, when the app mounts */
   useEffect(() => {
     const controller = new AbortController();
@@ -167,18 +165,18 @@ export default function App() {
     const ws = new WebSocket(getWebSocketUrl('/ws'));
     ws.onmessage = (evt) => {
       try {
-        const data = JSON.parse(evt.data);     
+        const data = JSON.parse(evt.data);
         setGuestCount(data.guestCount);
       } catch (e) {
         console.error("WS parse error", e);
       }
     };
-  
-    ws.onopen    = () => console.log("WS connected");
-    ws.onclose   = () => console.log("WS closed");
-    ws.onerror   = (e) => console.error("WS error", e);
-  
-    return () => ws.close();                   
+
+    ws.onopen = () => console.log("WS connected");
+    ws.onclose = () => console.log("WS closed");
+    ws.onerror = (e) => console.error("WS error", e);
+
+    return () => ws.close();
   }, []);
 
   const closeViewer = useCallback((idx) => {
@@ -191,15 +189,15 @@ export default function App() {
     const token = localStorage.getItem('authToken');
     if (!token) return;
     const ids = indices
-      .sort((a,b)=>a-b)
+      .sort((a, b) => a - b)
       .map(i => (myPhotos[i] ? myPhotos[i].id : null))
       .filter(v => v != null);
     try {
       setBusy(true);
       for (let n = 0; n < ids.length; n++) {
         const id = ids[n];
-        setBusyText(`Deleting ${n+1}/${ids.length}`);
-        await fetch(deletePhotoUrl(id), { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
+        setBusyText(`Deleting ${n + 1}/${ids.length}`);
+        await fetchWithAuth(deletePhotoUrl(id), { method: 'DELETE' });
       }
       await fetchAllPhotos();
       await fetchMyPhotos();
@@ -208,6 +206,29 @@ export default function App() {
       setBusyText("");
     }
   }, [myPhotos, fetchAllPhotos, fetchMyPhotos]);
+
+  // Delete selected photos for All Photos tab (admin only)
+  const deleteAllPhotosByIndices = useCallback(async (indices, setBusy, setBusyText) => {
+    const token = localStorage.getItem('authToken');
+    if (!token) return;
+    const ids = indices
+      .sort((a, b) => a - b)
+      .map(i => (allPhotos[i] ? allPhotos[i].id : null))
+      .filter(v => v != null);
+    try {
+      setBusy(true);
+      for (let n = 0; n < ids.length; n++) {
+        const id = ids[n];
+        setBusyText(`Deleting ${n + 1}/${ids.length}`);
+        await fetchWithAuth(deletePhotoUrl(id), { method: 'DELETE' });
+      }
+      await fetchAllPhotos();
+      await fetchMyPhotos();
+    } finally {
+      setBusy(false);
+      setBusyText("");
+    }
+  }, [allPhotos, fetchAllPhotos, fetchMyPhotos]);
 
   // Show authentication forms if not authenticated and not guest
   if (!isAuthenticated && !isGuest) {
@@ -264,8 +285,14 @@ export default function App() {
           setViewerOpen={setViewerOpen}
           lastViewedIndex={lastViewedIndex}
           onClose={closeViewer}
-          canDelete={activeTab === 'mine'}
-          onDeleteSelected={activeTab === 'mine' ? deleteMyPhotosByIndices : undefined}
+          canDelete={activeTab === 'mine' || (activeTab === 'all' && user?.email === 'arielsholet1234@gmail.com')}
+          onDeleteSelected={
+            activeTab === 'mine'
+              ? deleteMyPhotosByIndices
+              : (activeTab === 'all' && user?.email === 'arielsholet1234@gmail.com')
+                ? deleteAllPhotosByIndices
+                : undefined
+          }
         />
       ) : null}
     </>
